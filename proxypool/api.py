@@ -28,8 +28,11 @@ Welcome to zhoujl's Proxy Pool ~ ^_^ ~
 Friday, July 13, 2018
 </h4>
 <h4>
-宝宝你的炸鸡好吃吗哈哈哈哈哈哈哈
+宝宝HAHAHA
 </h4>
+<a href="http://101.132.68.100:5000/count">IP's counts~</a>
+<br>
+<a href="http://101.132.68.100:5000/get">GET an ip for use now!</a>
 </h2>
 """
 @app.route('/')
@@ -45,7 +48,7 @@ def get_proxy():
     打印代理队列的第一个数据
     """
     conn = get_conn()
-    return conn.get()
+    return conn.pop_for_use()
 
 @app.route('/count')
 def get_counts():

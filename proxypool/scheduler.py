@@ -36,14 +36,14 @@ class ValidityTester(object):
         :param proxy: 单个待测代理
         :return:
         """
+        if isinstance(proxy, bytes):
+            proxy = proxy.decode('utf8')
         # 尝试开启aiohttp，否则抛出ServerDisconnectedError, ClientConnectorError, ClientResponseError等连接异常
         try:
             async with aiohttp.ClientSession() as session:
                 # aiohttp已成功开启，开始验证代理ip的有效性
                 # 若代理无效，则抛出 ProxyConnectionError, TimeoutError, ValueError 异常
                 try:
-                    if isinstance(proxy, bytes):
-                        proxy.decode('utf8')
                     async with session.get(url=self.test_api, proxy='http://{}'.format(proxy),
                                            timeout=GET_PROXIES_TIMEOUT) as response:
                         if response.status == 200:
