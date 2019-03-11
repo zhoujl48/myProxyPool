@@ -1,28 +1,49 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-# @Time    : 2018/7/15 11:25
-# @Author  : zhoujl
-# @Site    :
-# @File    : scheduler.py
-# @Software: PyCharm
+#!/usr/bin/python
+# -*- coding:utf-8 -*-
+################################################################################
+#
+# Copyright (c) 2019 ***.com, Inc. All Rights Reserved
+# The Proxy-Pool project
+################################################################################
+"""
+动态代理池 -- 代理IP获取模块
+
+Usage: 供Scheduler调用
+Authors: Zhou Jialiang
+Email: zjl_sempre@163.com
+Date: 2018/7/15
+"""
+
 import requests
 from bs4 import BeautifulSoup
 from bs4.element import Tag
-from proxypool.settings import HEADERS
+from config import HEADERS
 
 
 class ProxyMetaclass(type):
-    """
-    元类， 在FreeProxyGetter中添加两个属性：
-    __CrawlFunc__: 爬虫函数组成的列表
-    __CrawlFuncCount__: 爬虫函数的数量，即列表的长度
+    """元类
+    通过元类构造的类，具有__new__()方法的功能
+    即可在后文FreeProxyGetter类中添加两个属性：
+        __CrawlFunc__: 爬虫函数组成的列表
+        __CrawlFuncCount__: 爬虫函数的数量，即列表的长度
     """
 
     def __new__(cls, name, bases, attrs):
+        """重写__new__方法
+        构造一个空对象，在__init__之前执行
+
+        Args:
+            name: 构建的类名
+            bases: 基类集合元组，若只有一个基类则应写成(base1,)形式
+            attrs: 类属性(包括属性和方法)
+
+        Return:
+            type.__new__(cls, name, bases, attrs): 由重写的__new__()构造的类
+        """
         count = 0
         attrs['__CrawlFunc__'] = []
         for key, value in attrs.items():
-            if 'crawl_' in key:
+            if '_crawl_' in key:
                 attrs['__CrawlFunc__'].append(key)
                 count += 1
         attrs['__CrawlFuncCount__'] = count
@@ -30,15 +51,15 @@ class ProxyMetaclass(type):
 
 
 class FreeProxyGetter(object, metaclass=ProxyMetaclass):
-    def get_raw_proxies(self, callback):
-        proxies = []
-        print('Callback: {}'.format(callback))
-        for proxy in eval('self.{}()'.format(callback)):
-            print('Getting {} from {}'.format(proxy, callback))
-            proxies.append(proxy)
-        return proxies
+    """免费代理获取类
+    通过元类ProxyMetaclass构造，
+    即天生具有_CrawFunc__和__CrawFuncCount__这两个属性，
+    进而方便对爬虫方法进行管理
+    """
 
-    def crawl_xicidaili(self):
+    def _crawl_xicidaili(self):
+        """爬虫方法——www.xicidaili.com
+        """
         base_url = 'http://www.xicidaili.com/wt/{page}'
         for page in range(1, 2):
             resp = requests.get(url=base_url.format(page=page), headers=HEADERS)
@@ -55,7 +76,9 @@ class FreeProxyGetter(object, metaclass=ProxyMetaclass):
                         if ip[0].isdigit():
                             yield ip
 
-    def crawl_66ip(self):
+    def _crawl_66ip(self):
+        """爬虫方法——www.66ip.cn
+        """
         base_url = 'http://www.66ip.cn/{page}.html'
         for page in range(1, 6):
             resp = requests.get(url=base_url.format(page=page), headers=HEADERS)
@@ -72,7 +95,9 @@ class FreeProxyGetter(object, metaclass=ProxyMetaclass):
                         if ip[0].isdigit():
                             yield ip
 
-    def crawl_data5u(self):
+    def _crawl_data5u(self):
+        """爬虫方法——www.data5u.com
+        """
         base_url = 'http://www.data5u.com/free/{}/index.shtml'
         for i in ['gngn', 'gnpt']:
             resp = requests.get(url=base_url.format(i), headers=HEADERS)
@@ -86,16 +111,28 @@ class FreeProxyGetter(object, metaclass=ProxyMetaclass):
                     ip = '{host}:{port}'.format(host=ip_host, port=ip_port)
                     yield ip
 
+    def get_raw_proxies(self, callback):
+        """调用接口
+        指定具体的爬虫方法，获取免费代理IP
 
-def main():
-    getter = FreeProxyGetter()
-    for ip in getter.crawl_xicidaili():
-        print(ip)
-    for ip in getter.crawl_66ip():
-        print(ip)
-    for ip in getter.crawl_data5u():
-        print(ip)
+        Args:
+            callbacks: 具体的爬虫方法
+
+        Return:
+            proxies: 爬取的代理IP列表
+        """
+        proxies = list()
+        print('Callback: {}'.format(callback))
+        for proxy in eval('self.{}()'.format(callback)):
+            print('Getting {} from {}'.format(proxy, callback))
+            proxies.append(proxy)
+        return proxies
+
 
 if __name__ == '__main__':
-    main()
+
+    # 测试用
+    getter = FreeProxyGetter()
+    for craw_func in getter.__CrawlFunc__:
+        getter.get_raw_proxies(callback=craw_func)
 

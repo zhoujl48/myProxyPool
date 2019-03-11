@@ -1,10 +1,18 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-# @Time    : 2018/7/18 11:13
-# @Author  : zhoujl
-# @Site    : 
-# @File    : test.py
-# @Software: PyCharm
+#!/usr/bin/python
+# -*- coding:utf-8 -*-
+################################################################################
+#
+# Copyright (c) 2019 ***.com, Inc. All Rights Reserved
+# The Proxy-Pool project
+################################################################################
+"""
+动态代理池 -- 代理IP测试模块（本地）
+
+Usage: python test.py
+Authors: Zhou Jialiang
+Email: zjl_sempre@163.com
+Date: 2018/7/15
+"""
 import json
 import requests
 from selenium import webdriver

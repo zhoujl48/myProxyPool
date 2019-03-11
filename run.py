@@ -5,9 +5,9 @@
 # @Site    : 
 # @File    : run.py
 # @Software: PyCharm
-from proxypool.api import app
-from proxypool.scheduler import Scheduler
-from proxypool.settings import FLASK_HOST, FLASK_PORT
+from api import app
+from scheduler import Scheduler
+from config import FLASK_HOST, FLASK_PORT
 
 def main():
     s = Scheduler()
